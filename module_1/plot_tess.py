@@ -20,6 +20,15 @@ from pathlib import Path
 from astropy.convolution import convolve, Gaussian1DKernel
 from astropy.timeseries import BoxLeastSquares as BLS
 
+from matplotlib.patches import Ellipse
+from matplotlib.offsetbox import AnchoredOffsetbox
+
+class AnchoredEllipse(AnchoredOffsetbox):
+    def __init__(self, transform, width, height, angle, loc, pad=0.4, borderpad=0.5, prop=None, **kwargs):
+        ellipse = Ellipse((0.5, 0.5), width, height, angle)
+        AnchoredOffsetbox.__init__(self, loc, pad=pad, borderpad=borderpad, child=ellipse, prop=prop, frameon=False, **kwargs)
+        ellipse.set_transform(transform)
+
 def main():
 
     p = argparse.ArgumentParser()
@@ -193,7 +202,9 @@ def main():
                 starLoc = wcs.all_world2pix([[Ra,Dec]],0)  #Second is origin
                 nearbyLoc = wcs.all_world2pix(nearbyStars[1:], 0)
 
-                fig.add_subplot(241, projection = wcs)
+                #fig.add_subplot(241, projection = wcs)
+                # Apparently not a valid projection type?
+                fig.add_subplot(241)
                 plt.title(starName+' mean image',fontsize=10)
 
                 saturation = 1.*(mean_image > 1.0e5)
@@ -537,4 +548,5 @@ def main():
                 plt.savefig(plotname)
                 plt.show(block=True)
 
-main()
+if __name__ == "__main__":
+    main()
