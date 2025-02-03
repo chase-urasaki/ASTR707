@@ -20,32 +20,9 @@ from pathlib import Path
 from astropy.convolution import convolve, Gaussian1DKernel
 from astropy.timeseries import BoxLeastSquares as BLS
 
-def main():
-
-    p = argparse.ArgumentParser()
-    p.add_argument("starname",nargs=1)
-    p.add_argument('--filter',dest='filterperiods')
-    p.add_argument('--fake',dest='fake')
-    p.add_argument('--zoom',dest='zoom')
-    p.add_argument('--nodetrend',dest='detrend',action='store_false',default='store_false')
-    p.add_argument('--deflc',dest='deflc',action='store_true',default='store_false')
-    p.add_argument('--flare',dest='flare')
-    p.add_argument('--sector',dest='sector')
-    p.add_argument('--prange',dest='prange',default ="0.2,10")
-
-    args = p.parse_args()
-    starName = args.starname
-    starName = str(starName[0])
-    filterperiods = args.filterperiods
-    fake = args.fake
-    zoom = args.zoom
-    deflc = args.deflc
-    flare = args.flare
-    sector = args.sector
-    prange = args.prange
-    detrend = args.detrend
-
-
+def main(starName = "GJ 480", filterperiods = None, fake = None, 
+         zoom = None, deflc = False, flare = None, sector = None, 
+         prange = (0.2,10), detrend = False):
     # TIC star matching settings
     radSearch = 5 / 3600.
     nstar = 5
@@ -297,8 +274,14 @@ def main():
                 d = distance[good]
                 ffix = pdcsap_fluxes[good]  
                 ffix = ffix/np.nanmedian(ffix)
-                #ffix = sapflux[good]
+
+                    
                 
+                
+                #ffix = sapflux[good]
+
+
+
                 if flare != None:
                     flarecut = np.nanmean(ffix) + float(flare)*np.nanstd(ffix)
                     good = np.where(ffix < flarecut)
@@ -536,4 +519,7 @@ def main():
                 plt.savefig(plotname)
                 plt.show(block=True)
 
-main()
+                return period, depth 
+
+if __name__ == "__main__": 
+    main()
