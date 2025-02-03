@@ -13,7 +13,8 @@ def run_plot_tess(target_name: str, test_period: float, test_depth: float):
         "--fake",
         f"{test_period},{test_depth}"
     ]
-
+    
+    print(f"Running command: {' '.join(cmd)}")
     result = subprocess.run(cmd, capture_output=True, text=True)
 
     if result.returncode == 0:
@@ -21,7 +22,9 @@ def run_plot_tess(target_name: str, test_period: float, test_depth: float):
         match = re.search(r"Transit fit parameters =\s+([\d\.\s]+)", result.stdout)
         if match:
             params = list(map(float, match.group(1).split()))
+            print(params)
             return params
+        
         return [np.nan, np.nan]
     else:
         return [np.nan, np.nan]
@@ -32,7 +35,7 @@ def process_point(period_idx, depth_idx, orbital_period, transit_depth):
     test_depth = transit_depth[depth_idx]
 
     # Initialize trial array to store results
-    trial_array = np.zeros((2, 50))
+    trial_array = np.zeros((2, 25))
     for i in range(trial_array.shape[1]):
         params = run_plot_tess("GJ 480", test_period, test_depth)
         trial_array[0, i] = params[0]  # period
@@ -56,8 +59,8 @@ def process_point(period_idx, depth_idx, orbital_period, transit_depth):
 
 
 def main():
-    orbital_period = np.linspace(0.5, 23, 100)
-    transit_depth = np.logspace(-3, -1, 200)
+    orbital_period = np.linspace(0.5, 23, 50)
+    transit_depth = np.logspace(-3, -1, 100)
     detectability = np.zeros((len(orbital_period), len(transit_depth)))
 
     # Create a list of tasks
@@ -76,10 +79,15 @@ def main():
         detectability[period_idx, depth_idx] = detect_status
 
     print("Detectability grid completed.")
-    return detectability
+    return detectability, orbital_period, transit_depth
 
 
 if __name__ == "__main__":
-    detectability = main()
+    detectability, orbital_periods, transit_depths = main()
+
+    # Save the results
+    np.save("detectability.npy", detectability)
+    np.save("orbital_periods.npy", orbital_periods)
+    np.save("transit_depths.npy", transit_depths)
 
 #%%
