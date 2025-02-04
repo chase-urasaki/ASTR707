@@ -6,8 +6,8 @@ from tqdm import tqdm
 # %%
 
 def main():
-    orbital_period = np.linspace(0.5, 23, 50)
-    transit_depth = np.logspace(-3, -1, 100)
+    orbital_period = np.linspace(0.5, 23, 2)
+    transit_depth = np.logspace(-3, -1, 35)
     detectability = np.zeros((len(orbital_period), len(transit_depth)))
 
     # for period_idx in range(len(orbital_period)):
@@ -49,7 +49,7 @@ def main():
     total_its = len(orbital_period) * len(transit_depth)
 
     with tqdm(total=total_its, desc = "Points") as pbar:
-        for period_idx in range(len(orbital_period)):
+        for period_idx in range(len(orbital_period)[0:2]):
             for depth_idx in range(len(transit_depth)):
                 # Run planet injection for each point on the meshgrid 50 times
                 # initialze an array to store the results

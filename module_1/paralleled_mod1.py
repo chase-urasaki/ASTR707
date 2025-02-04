@@ -35,11 +35,11 @@ def process_point(period_idx, depth_idx, orbital_period, transit_depth):
     test_depth = transit_depth[depth_idx]
 
     # Initialize trial array to store results
-    trial_array = np.zeros((2, 25))
+    trial_array = np.zeros((2, 7))
     for i in range(trial_array.shape[1]):
         params = run_plot_tess("GJ 480", test_period, test_depth)
         trial_array[0, i] = params[0]  # period
-        trial_array[1, i] = params[1]  # depth
+        trial_array[1, i] = params[-1]  # depth
 
     # Compute the median period and depth
     median_period = np.median(trial_array[0, :])
@@ -59,9 +59,11 @@ def process_point(period_idx, depth_idx, orbital_period, transit_depth):
 
 
 def main():
-    orbital_period = np.linspace(0.5, 23, 50)
-    transit_depth = np.logspace(-3, -1, 100)
+    orbital_period = np.linspace(0.5, 23, 20)[17:] #right endpoint inclusive, left endpoint exclusive
+    transit_depth = np.logspace(-3, -1, 20)
     detectability = np.zeros((len(orbital_period), len(transit_depth)))
+
+    MAX_WORKERS = 12
 
     # Create a list of tasks
     tasks = [
@@ -71,7 +73,7 @@ def main():
     ]
 
     # Use ProcessPoolExecutor for parallel execution
-    with ProcessPoolExecutor() as executor:
+    with ProcessPoolExecutor(max_workers=MAX_WORKERS) as executor:
         results = executor.map(process_point, *zip(*tasks))  # Unpack tasks
 
     # Update the detectability grid based on results
@@ -86,8 +88,7 @@ if __name__ == "__main__":
     detectability, orbital_periods, transit_depths = main()
 
     # Save the results
-    np.save("detectability.npy", detectability)
-    np.save("orbital_periods.npy", orbital_periods)
-    np.save("transit_depths.npy", transit_depths)
+    np.savetxt("detectability_17_end.csv", detectability, delimiter=',')
+
 
 #%%
